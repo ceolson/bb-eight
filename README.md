@@ -13,10 +13,10 @@
 * ggthemes
 * optparse
 * stringi
+* [PIC-SURE](https://github.com/hms-dbmi/pic-sure)
 
 ## System:
 * bcftools
-* [PIC-SURE](https://github.com/hms-dbmi/pic-sure)
 
 ## Running the BB-EIGHT API from the terminal:
 
