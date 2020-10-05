@@ -13,7 +13,7 @@
 * ggthemes
 * optparse
 * stringi
-* [PIC-SURE](https://github.com/hms-dbmi/pic-sure)
+* [PIC-SURE](https://github.com/hms-dbmi/pic-sure-r-adapter-hpds)
 
 ## System:
 * bcftools
