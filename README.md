@@ -1,5 +1,3 @@
-# Installing the BB-EIGHT API:
-
 ## Python packages required:
 
 * flask
@@ -18,6 +16,7 @@
 
 ## System:
 * bcftools
+* [PIC-SURE](https://github.com/hms-dbmi/pic-sure)
 
 ## Running the BB-EIGHT API from the terminal:
 
