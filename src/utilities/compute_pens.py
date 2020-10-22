@@ -4,7 +4,7 @@ from scipy import stats
 import pandas as pd
 import sqlite3
 
-# Selection criteria:
+# Hyperparameters:
 # c1 is whether cohort 1 is included, analogous for c2, c3, c4
 
 # lvwt_th and sbp_th divide the space of individuals into four quadrants
@@ -53,10 +53,10 @@ def get_data(bdc, c1, c2, c3, c4, lvwt_th, sbp_th, quadrant):
 def compute_penetrance(bdc, c1, c2, c3, c4, lvwt_th, sbp_th, quadrant, mode, pathogenic_ids):
     population, case, control = get_data(bdc, c1, c2, c3, c4, lvwt_th, sbp_th, quadrant)
     
-    num_dg = case[pathogenic_ids].any("columns").count()      # how many cases have pathogenic variants
-    num_d = case.size                                         # how many cases
-    num_g = population[pathogenic_ids].any("columns").count() # how many people have pathogenic variants
-    num_all = population.size                                 # how many people total
+    num_dg = case[pathogenic_ids].any("columns").sum()        # how many cases have pathogenic variants
+    num_d = len(case.index)                                   # how many cases
+    num_g = population[pathogenic_ids].any("columns").sum()   # how many people have pathogenic variants
+    num_all = len(population.index)                           # how many people total
 
     gld_rv = scipy.stats.beta(num_dg + 1, num_d - num_dg + 1)      # P(G|D)
     d_rv = scipy.stats.beta(num_d + 1, num_all - num_d + 1)        # P(D)
@@ -106,17 +106,18 @@ def compute_pens(bdc_database, variants_database):
     pens = pd.DataFrame(columns=["mode", "penetrance", 
                                  "cohort1", "cohort2", "cohort3", "cohort4",
                                  "LVWT threshold", "SBP threshold",
-                                 "Quadrant"])
+                                 "quadrant"])
 
+    # all the hyperparameters
     choice_set = [(mode, c1, c2, c3, c4, lvwt_th, sbp_th, quad) \
                     for mode in ["map", "5", "95"] \
                     for c1 in [True, False] \
                     for c2 in [True, False] \
                     for c3 in [True, False] \
                     for c4 in [True, False] \
-                    for lvwt_th in np.arange(0.8, 1, 0.03) \
-                    for sbp_th in np.arange(0.8, 1, 0.03) \
-                    for quad in [1]]
+                    for lvwt_th in np.arange(0.6, 1, 0.05) \
+                    for sbp_th in np.arange(0.6, 1, 0.05) \
+                    for quad in [1]]   # only do quadrant 1
                     
     for choice in choice_set:
         mode, c1, c2, c3, c4, lvwt_th, sbp_th, quadrant = choice
@@ -125,14 +126,15 @@ def compute_pens(bdc_database, variants_database):
         if not (c1 or c2 or c3 or c4):
             continue
             
-        pen = compute_penetrance(bdc, c1, c2, c3, c4, lvwt_th, sbp_th, quadrant, mode, pathogenic_ids)
+        pen = compute_penetrance(bdc, c1, c2, c3, c4, lvwt_th, sbp_th, 
+                                 quadrant, mode, pathogenic_ids)
         row = pd.DataFrame([[mode, pen, 
                              c1, c2, c3, c4, 
                              lvwt_th, sbp_th, quadrant]], 
                            columns=["mode", "penetrance", 
                                     "cohort1", "cohort2", "cohort3", "cohort4",
                                     "LVWT threshold", "SBP threshold",
-                                    "Quadrant"])
+                                    "quadrant"])
         pens = pens.append(row, ignore_index=True)
 
     return pens
